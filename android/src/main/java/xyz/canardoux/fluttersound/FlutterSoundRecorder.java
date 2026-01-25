@@ -44,6 +44,10 @@ public class FlutterSoundRecorder extends FlutterSoundSession implements FlautoR
 	static final String ERR_RECORDER_IS_RECORDING = "ERR_RECORDER_IS_RECORDING";
 	final static String             TAG                = "FlutterSoundRecorder";
 	FlautoRecorder m_recorder;
+    private final Map<String, Object> recordingDataMap = new HashMap<>();
+    private final Map<String, Object> recordingDataFloat32Map = new HashMap<>();
+    private final Map<String, Object> recordingDataInt16Map = new HashMap<>();
+    private final Map<String, Object> progressMap = new HashMap<>();
 
 // =============================================================  callback ===============================================================
 
@@ -78,33 +82,29 @@ public class FlutterSoundRecorder extends FlutterSoundSession implements FlautoR
 
 	public void updateRecorderProgressDbPeakLevel(double normalizedPeakLevel, long duration)
       {
-	      Map<String, Object> dic = new HashMap<String, Object>();
-	      dic.put("duration", duration);
-	      dic.put("dbPeakLevel", normalizedPeakLevel);
-	      invokeMethodWithMap("updateRecorderProgress", true, dic);
+          progressMap.put("duration", duration);
+          progressMap.put("dbPeakLevel", normalizedPeakLevel);
+	      invokeMethodWithMap("updateRecorderProgress", true, progressMap);
       }
 
       public void recordingData ( byte[] data)
       {
-	      Map<String, Object> dic = new HashMap<String, Object>();
-	      dic.put("data", data);
-	      invokeMethodWithMap("recordingData", true, dic);
+          recordingDataMap.put("data", data);
+	      invokeMethodWithMap("recordingData", true, recordingDataMap);
       }
 
 
 	public void recordingDataFloat32(ArrayList<float[]> data)
 	{
-		Map<String, Object> dic = new HashMap<String, Object>();
-		dic.put("data", data);
-		invokeMethodWithMap("recordingDataFloat32", true, dic);
+		recordingDataFloat32Map.put("data", data);
+		invokeMethodWithMap("recordingDataFloat32", true, recordingDataFloat32Map);
 	}
 
 
 	public void recordingDataInt16(ArrayList<byte[]> data)
 	{
-		Map<String, Object> dic = new HashMap<String, Object>();
-		dic.put("data", data);
-		invokeMethodWithMap("recordingDataInt16", true, dic);
+		recordingDataInt16Map.put("data", data);
+		invokeMethodWithMap("recordingDataInt16", true, recordingDataInt16Map);
 	}
 
 
