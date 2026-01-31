@@ -1,0 +1,3 @@
+[submodule "android/flutter_sound_core"]
+	path = android/flutter_sound_core
+	url = git@github.com:781flyingdutchman/flutter_sound_core.git
