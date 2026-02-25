@@ -42,15 +42,18 @@
 
 - (void)updateRecorderProgressDbPeakLevel: normalizedPeakLevel duration: duration;
 {
+    @autoreleasepool {
         NSDictionary* dico = @{ @"slotNo": [NSNumber numberWithInt: slotNo], @"status": [NSNumber numberWithInt: -1], @"dbPeakLevel": normalizedPeakLevel, @"duration": duration};
         [self invokeMethod:@"updateRecorderProgress" dico: dico ];
+    }
 }
  
 - (void)recordingData: (NSData*)data
 {
+    @autoreleasepool {
         NSDictionary* dico = @{ @"slotNo": [NSNumber numberWithInt: slotNo],  @"status": [NSNumber numberWithInt: -1], @"data": data};
         [self invokeMethod:@"recordingData" dico: dico ];
-  
+    }
 }
 
 - (void)recordingDataFloat32: (NSMutableArray*)data
@@ -60,33 +63,35 @@
  
 - (void)recordingDataNotInterleaved: (NSMutableArray*)data  codec: (t_CODEC)codec
 {
-    NSMutableDictionary* dico = [[NSMutableDictionary alloc] init];
-    int nbChannels = (int)[data count] ;
-    [dico addEntriesFromDictionary: @{ @"slotNo": [NSNumber numberWithInt: slotNo],  @"status": [NSNumber numberWithInt: -1],  @"data": data, @"channelCount": [NSNumber numberWithInt: nbChannels]}];
-    NSMutableArray* ddd =  [NSMutableArray arrayWithCapacity: nbChannels] ;
-    for (int i = 0; i < nbChannels; ++i)
-    {
-        NSString *baseString = @"Data";
-        NSString *string2 = [baseString stringByAppendingFormat: @"Channel%@", [NSNumber numberWithInt: i]];
-        NSData* d = data[i];
-        FlutterStandardTypedData* dd;
+    @autoreleasepool {
+        NSMutableDictionary* dico = [[NSMutableDictionary alloc] init];
+        int nbChannels = (int)[data count] ;
+        [dico addEntriesFromDictionary: @{ @"slotNo": [NSNumber numberWithInt: slotNo],  @"status": [NSNumber numberWithInt: -1],  @"data": data, @"channelCount": [NSNumber numberWithInt: nbChannels]}];
+        NSMutableArray* ddd =  [NSMutableArray arrayWithCapacity: nbChannels] ;
+        for (int i = 0; i < nbChannels; ++i)
+        {
+            NSString *baseString = @"Data";
+            NSString *string2 = [baseString stringByAppendingFormat: @"Channel%@", [NSNumber numberWithInt: i]];
+            NSData* d = data[i];
+            FlutterStandardTypedData* dd;
+            if (codec == pcm16)
+            {
+                dd = [FlutterStandardTypedData typedDataWithBytes: d]; // No FlutterStandardTypedData exists with Int16 !
+            } else if (codec == pcmFloat32)
+            {
+                dd = [FlutterStandardTypedData typedDataWithFloat32: d];
+            }
+            [dico setValue: dd forKey: string2];
+            [ddd addObject: dd];
+        }
+        [dico setValue: ddd forKey: @"data"];
         if (codec == pcm16)
         {
-            dd = [FlutterStandardTypedData typedDataWithBytes: d]; // No FlutterStandardTypedData exists with Int16 !
+            [self invokeMethod: @"recordingDataInt16" dico: dico ];
         } else if (codec == pcmFloat32)
         {
-            dd = [FlutterStandardTypedData typedDataWithFloat32: d];
+            [self invokeMethod: @"recordingDataFloat32" dico: dico ];
         }
-        [dico setValue: dd forKey: string2];
-        [ddd addObject: dd];
-    }
-    [dico setValue: ddd forKey: @"data"];
-    if (codec == pcm16)
-    {
-        [self invokeMethod: @"recordingDataInt16" dico: dico ];
-    } else if (codec == pcmFloat32)
-    {
-        [self invokeMethod: @"recordingDataFloat32" dico: dico ];
     }
 }
 
